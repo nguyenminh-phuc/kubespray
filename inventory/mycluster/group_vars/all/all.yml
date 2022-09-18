@@ -12,9 +12,12 @@ bin_dir: /usr/local/bin
 
 ## External LB example config
 ## apiserver_loadbalancer_domain_name: "elb.some.domain"
-# loadbalancer_apiserver:
-#   address: 1.2.3.4
-#   port: 1234
+loadbalancer_apiserver:
+  address: 192.168.203.40
+  port: 8383
+
+keepalived_bind_interface: ens32
+keepalived_vip: 192.168.203.40
 
 ## Internal loadbalancers for apiservers
 # loadbalancer_apiserver_localhost: true

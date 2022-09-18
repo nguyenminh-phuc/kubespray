@@ -4,7 +4,7 @@
 # dashboard_enabled: false
 
 # Helm deployment
-helm_enabled: false
+helm_enabled: true
 
 # Registry deployment
 registry_enabled: false
@@ -13,7 +13,7 @@ registry_enabled: false
 # registry_disk_size: "10Gi"
 
 # Metrics Server deployment
-metrics_server_enabled: false
+metrics_server_enabled: true
 # metrics_server_container_port: 4443
 # metrics_server_kubelet_insecure_tls: true
 # metrics_server_metric_resolution: 15s
@@ -160,10 +160,10 @@ cert_manager_enabled: false
 # cert_manager_leader_election_namespace: kube-system
 
 # MetalLB deployment
-metallb_enabled: false
+metallb_enabled: true
 metallb_speaker_enabled: true
-# metallb_ip_range:
-#   - "10.5.0.50-10.5.0.99"
+metallb_ip_range:
+  - "192.168.203.50-192.168.203.99"
 # metallb_pool_name: "loadbalanced"
 # matallb_auto_assign: true
 # metallb_speaker_nodeselector:
@@ -179,15 +179,15 @@ metallb_speaker_enabled: true
 #     operator: "Equal"
 #     value: ""
 #     effect: "NoSchedule"
-# metallb_controller_tolerations:
-#   - key: "node-role.kubernetes.io/master"
-#     operator: "Equal"
-#     value: ""
-#     effect: "NoSchedule"
-#   - key: "node-role.kubernetes.io/control-plane"
-#     operator: "Equal"
-#     value: ""
-#     effect: "NoSchedule"
+metallb_controller_tolerations:
+  - key: "node-role.kubernetes.io/master"
+    operator: "Equal"
+    value: ""
+    effect: "NoSchedule"
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Equal"
+    value: ""
+    effect: "NoSchedule"
 # metallb_version: v0.12.1
 # metallb_protocol: "layer2"
 # metallb_port: "7472"

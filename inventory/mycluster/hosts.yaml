@@ -2,22 +2,28 @@ all:
   hosts:
     node1:
       ansible_host: 192.168.203.10
+      ansible_user: user
       ip: 192.168.203.10
       access_ip: 192.168.203.10
     node2:
       ansible_host: 192.168.203.20
+      ansible_user: user
       ip: 192.168.203.20
       access_ip: 192.168.203.20
     node3:
       ansible_host: 192.168.203.30
+      ansible_user: user
       ip: 192.168.203.30
       access_ip: 192.168.203.30
   children:
     kube_control_plane:
       hosts:
         node1:
+          keepalived_priority: 101
         node2:
+          keepalived_priority: 100
         node3:
+          keepalived_priority: 100
     kube_node:
       hosts:
         node1:

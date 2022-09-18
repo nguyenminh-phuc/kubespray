@@ -1,0 +1,21 @@
+global_defs {
+}
+
+vrrp_script check-haroxy {
+	script     "killall -0 haproxy"
+	interval 2
+	weight 2
+}
+
+vrrp_instance haproxy {
+	state MASTER
+	interface {{ keepalived_bind_interface }}
+	virtual_router_id 10
+	priority {{ keepalived_priority }}
+	virtual_ipaddress {
+		{{ keepalived_vip }} dev {{ keepalived_bind_interface }}
+	}
+	track_script {
+		check-haroxy
+	}
+}
