@@ -1,20 +1,20 @@
 all:
   hosts:
     node1:
-      ansible_host: 192.168.203.10
+      ansible_host: 192.168.1.71
       ansible_user: user
-      ip: 192.168.203.10
-      access_ip: 192.168.203.10
+      ip: 192.168.1.71
+      access_ip: 192.168.1.71
     node2:
-      ansible_host: 192.168.203.20
+      ansible_host: 192.168.1.72
       ansible_user: user
-      ip: 192.168.203.20
-      access_ip: 192.168.203.20
+      ip: 192.168.1.72
+      access_ip: 192.168.1.72
     node3:
-      ansible_host: 192.168.203.30
+      ansible_host: 192.168.1.73
       ansible_user: user
-      ip: 192.168.203.30
-      access_ip: 192.168.203.30
+      ip: 192.168.1.73
+      access_ip: 192.168.1.73
   children:
     kube_control_plane:
       hosts:
