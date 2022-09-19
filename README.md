@@ -1,3 +1,14 @@
+## Playbook for my home server setup
+
+3 nodes
+
+- External HAProxy + keepalived
+- L2 MetalLB
+- nginx ingress
+- Rook Ceph
+
+---
+
 # Deploy a Production Ready Kubernetes Cluster
 
 ![Kubernetes Logo](https://raw.githubusercontent.com/kubernetes-sigs/kubespray/master/docs/img/kubernetes-logo.png)

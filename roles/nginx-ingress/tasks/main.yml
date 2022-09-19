@@ -1,11 +1,12 @@
 ---
 - name: Add nginx repo
-  helm_repository:
+  kubernetes.core.helm_repository:
     name: nginx-stable
     repo_url: https://helm.nginx.com/stable
 
 - name: Deploy nginx ingress
-  helm:
+  kubernetes.core.helm:
     name: my-nginx
     chart_ref: nginx-stable/nginx-ingress
-    namespace: default
+    namespace: nginx-ingress
+    create_namespace: yes

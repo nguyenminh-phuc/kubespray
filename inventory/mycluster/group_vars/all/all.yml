@@ -123,3 +123,6 @@ kube_webhook_token_auth_url_skip_tls_verify: false
 # kube_webhook_token_auth_url: https://...
 ## base64-encoded string of the webhook's CA certificate
 # kube_webhook_token_auth_ca_data: "LS0t..."
+
+rook_ceph_version: v1.10.1
+ceph_version: v17.2.3
