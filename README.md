@@ -1,3 +1,39 @@
+## Home server setup
+
+This home server setup utilizes:
+
+- 3 nodes
+- kube-vip (ARP mode) for load balancing Kubernetes services
+- Rook Ceph for providing persistent storage
+
+```bash
+# install ansible
+VENVDIR=kubespray-venv
+python3 -m venv $VENVDIR
+source $VENVDIR/bin/activate
+pip install -U -r requirements.txt
+pip install ruamel.yaml
+
+cp -rfp inventory/sample inventory/mycluster
+declare -a IPS=(192.168.1.191 192.168.1.192 192.168.1.193)
+CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}
+
+ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml --extra-vars "ansible_sudo_pass=<password>"
+
+# install ceph
+# https://rook.io/docs/rook/latest-release/Helm-Charts/operator-chart/
+helm repo add rook-release https://charts.rook.io/release
+helm install --create-namespace --namespace rook-ceph rook-ceph rook-release/rook-ceph -f ceph-operator.yaml
+helm install --create-namespace --namespace rook-ceph rook-ceph-cluster --set operatorNamespace=rook-ceph rook-release/rook-ceph-cluster -f ceph-cluster.yaml
+
+# install kube-vip
+# https://kube-vip.io/docs/usage/cloud-provider/
+kubectl apply -f https://raw.githubusercontent.com/kube-vip/kube-vip-cloud-provider/main/manifest/kube-vip-cloud-controller.yaml
+kubectl create configmap -n kube-system kubevip --from-literal range-global=192.168.1.100-192.168.1.180
+```
+
+---
+
 # Deploy a Production Ready Kubernetes Cluster
 
 ![Kubernetes Logo](https://raw.githubusercontent.com/kubernetes-sigs/kubespray/master/docs/img/kubernetes-logo.png)
