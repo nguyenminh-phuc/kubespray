@@ -1,0 +1,31 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: localcert-issuer
+  namespace: homeserver
+spec:
+  acme:
+    email: minhphuc@protonmail.com
+    privateKeySecretRef:
+      name: localcert-acmedns-le
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    solvers:
+    - dns01:
+        acmeDNS:
+          host: https://api.getlocalcert.net/api/v1/acme-dns-compat
+          accountSecretRef:
+            name: localcert-acmedns
+            key: acmedns.json
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: localcert-certificate
+  namespace: homeserver
+spec:
+  dnsNames:
+    - phuc.localcert.net
+    - "*.phuc.localcert.net"
+  secretName: localcert-certificate
+  issuerRef:
+    name: localcert-issuer

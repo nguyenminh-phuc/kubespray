@@ -1,13 +1,18 @@
 ## Home server setup
 
-This home server setup utilizes:
+This home server setup utilizes the following:
 
 - 3 nodes
-- kube-vip (ARP mode) for load balancing Kubernetes services
-- Rook Ceph for providing persistent storage
+- kube-vip (ARP mode): LoadBalancer
+- Rook Ceph: persistent storage
+- Istio: service mesh
+- Argo CD: GitOps
+- kubeseal: encrypt Secrets
+- Gitea: git service
+- getlocalcert: ACME + DNS management
 
 ```bash
-# install ansible
+# ansible
 VENVDIR=kubespray-venv
 python3 -m venv $VENVDIR
 source $VENVDIR/bin/activate
@@ -20,16 +25,69 @@ CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inv
 
 ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml --extra-vars "ansible_sudo_pass=<password>"
 
-# install ceph
-# https://rook.io/docs/rook/latest-release/Helm-Charts/operator-chart/
-helm repo add rook-release https://charts.rook.io/release
-helm install --create-namespace --namespace rook-ceph rook-ceph rook-release/rook-ceph -f ceph-operator.yaml
-helm install --create-namespace --namespace rook-ceph rook-ceph-cluster --set operatorNamespace=rook-ceph rook-release/rook-ceph-cluster -f ceph-cluster.yaml
+# kubeconfig
+mkdir ~/.kube
+sudo cp /etc/kubernetes/admin.conf ~/.kube/config
+sudo chown -R $(whoami):$(whoami) ~/.kube/config
 
-# install kube-vip
+##########
+
+# argocd
+kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl port-forward -n argocd svc/argocd-server 8080:443
+
+# logical volumes for ceph
+sudo fdisk /dev/sda # create a partition, 'n' to create, 'w' to write
+sudo vgextend vg0 /dev/sda4
+sudo lvcreate -n ceph_vl -l 100%FREE vg0
+sudo dmsetup info /dev/dm-1 # this should match vg0-ceph_vl
+
+# ceph
+# https://rook.io/docs/rook/v1.15/Helm-Charts/operator-chart/
+kubectl create -f argocd-init-apps/rook-ceph-operator.yaml
+kubectl get pods -n rook-ceph -l "app=rook-ceph-operator"
+kubectl create -f argocd-init-apps/rook-ceph-cluster.yaml
+kubectl get cephcluster -n rook-ceph
+kubectl krew install rook-ceph
+
+# gitea
+# https://docs.gitea.com/installation/install-on-kubernetes
+kubectl create -f argocd-init-apps/gitea.yaml
+kubectl port-forward -n gitea svc/gitea-http 8081:3000 # kube-vip LoadBalancer isn't ready yet
+
+# kubeseal
+kubectl create -f argocd-init-apps/sealed-secrets.yaml
+kubeseal --fetch-cert > kubeseal-cert.pem
+
+# add gitea credentials to argocd
+export gitea_username=$(echo -n "<username>")
+export gitea_password=$(echo -n "<password>")
+yq e '.stringData.username = strenv(gitea_username) | .stringData.password = strenv(gitea_password)' argocd-init-apps/gitea-credentials.tpl > argocd-init-apps/gitea-credentials.unsealed.yaml
+kubeseal --cert kubeseal-cert.pem --format yaml < argocd-init-apps/gitea-credentials.unsealed.yaml > argocd-init-apps/gitea-credentials.sealed.yaml
+kubectl create -f argocd-init-apps/gitea-credentials.sealed.yaml
+
+# app of apps
+kubectl create -f argocd-init-apps/app-of-apps.yaml
+
+##########
+
+# kube-vip
 # https://kube-vip.io/docs/usage/cloud-provider/
-kubectl apply -f https://raw.githubusercontent.com/kube-vip/kube-vip-cloud-provider/main/manifest/kube-vip-cloud-controller.yaml
-kubectl create configmap -n kube-system kubevip --from-literal range-global=192.168.1.100-192.168.1.180
+kubectl get gtw -n homeserver homeserver-gateway # LoadBalancer should be operational now
+
+# gitea runner
+# https://gitea.com/gitea/act_runner/src/tag/v0.2.11/examples/kubernetes
+export gitea_token=$(echo -n "<token>")
+yq e '.stringData.token = strenv(gitea_token)' argocd-apps/gitea-token.tpl > argocd-apps/gitea-token.unsealed.yaml
+kubeseal --cert kubeseal-cert.pem --format yaml < argocd-apps/gitea-token.unsealed.yaml > argocd-apps/gitea-token.sealed.yaml
+git add argocd-apps/gitea-token.sealed.yaml
+
+# use acmedns
+# https://docs.getlocalcert.net/acme-clients/cert-manager/
+export acmedns=`cat localcert-acmedns.json`
+yq e '.stringData."acmedns.json" = strenv(acmedns)' argocd-apps/localcert-acmedns.tpl > argocd-apps/localcert-acmedns.unsealed.yaml
+kubeseal --cert kubeseal-cert.pem --format yaml < argocd-apps/localcert-acmedns.unsealed.yaml > argocd-apps/localcert-acmedns.sealed.yaml
+git add argocd-apps/localcert-acmedns.sealed.yaml
 ```
 
 ---

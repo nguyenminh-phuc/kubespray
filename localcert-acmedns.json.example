@@ -1,0 +1,10 @@
+{
+  "phuc.localcert.net": {
+    "username": "<placeholder>",
+    "password": "<placeholder>",
+    "fulldomain": "phuc.localcert.net",
+    "subdomain": "phuc",
+    "server_url": "https://api.getlocalcert.net/api/v1/acme-dns-compat",
+    "allowfrom": []
+  }
+}

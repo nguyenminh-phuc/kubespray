@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homeserver
+  labels:
+    homeserver-gateway: enabled
+    istio-injection: enabled
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+spec:
+  destination:
+    namespace: homeserver
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: http://gitea-http.gitea:3000/nguyenminh-phuc/k8s-homeserver
+    targetRevision: custom-v3
+    path: argocd-apps
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

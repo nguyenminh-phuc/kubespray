@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-vip
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://github.com/kube-vip/kube-vip-cloud-provider
+    targetRevision: v0.0.10
+    path: manifest
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

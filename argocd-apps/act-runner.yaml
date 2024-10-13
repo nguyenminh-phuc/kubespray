@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: act-runner
+  namespace: argocd
+spec:
+  destination:
+    namespace: gitea
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: http://gitea-http.gitea:3000/nguyenminh-phuc/k8s-homeserver
+    targetRevision: custom-v3
+    path: argocd-apps/act-runner
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,0 +1,203 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph
+  namespace: argocd
+spec:
+  destination:
+    namespace: rook-ceph
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.15.3
+    chart: rook-ceph
+    helm:
+      valuesObject:
+        resources:
+          limits:
+            memory: null
+          requests:
+            cpu: null
+            memory: null
+        csi:
+          provisionerReplicas: 1
+          csiRBDProvisionerResource: |
+            - name : csi-provisioner
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-resizer
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-attacher
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-snapshotter
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-rbdplugin
+              resource:
+                requests:
+                  memory: null
+                limits:
+                  memory: null
+            - name : csi-omap-generator
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : liveness-prometheus
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+          csiRBDPluginResource: |
+            - name : driver-registrar
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-rbdplugin
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : liveness-prometheus
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+          csiCephFSProvisionerResource: |
+            - name : csi-provisioner
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-resizer
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-attacher
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-snapshotter
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-cephfsplugin
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : liveness-prometheus
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+          csiCephFSPluginResource: |
+            - name : driver-registrar
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-cephfsplugin
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : liveness-prometheus
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+          csiNFSProvisionerResource: |
+            - name : csi-provisioner
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-nfsplugin
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-attacher
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+          csiNFSPluginResource: |
+            - name : driver-registrar
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+            - name : csi-nfsplugin
+              resource:
+                requests:
+                  memory: null
+                  cpu: null
+                limits:
+                  memory: null
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

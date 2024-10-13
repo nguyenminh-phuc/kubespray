@@ -8,10 +8,9 @@ helm_enabled: true
 
 # Registry deployment
 registry_enabled: true
-# registry_namespace: kube-system
-registry_storage_class: "ceph-block"
-registry_disk_size: "10Gi"
-registry_service_type: "LoadBalancer"
+registry_namespace: registry
+registry_storage_class: ceph-block
+# registry_disk_size: "10Gi"
 
 # Metrics Server deployment
 metrics_server_enabled: true
@@ -98,7 +97,7 @@ rbd_provisioner_enabled: false
 # rbd_provisioner_reclaim_policy: Delete
 
 # Gateway API CRDs
-gateway_api_enabled: false
+gateway_api_enabled: true
 # gateway_api_experimental_channel: false
 
 # Nginx ingress controller deployment

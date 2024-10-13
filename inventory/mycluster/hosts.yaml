@@ -2,19 +2,19 @@ all:
   hosts:
     node1:
       ansible_user: ubuntu
-      ansible_sudo_pass: ...
+      ansible_sudo_pass: <placeholder>
       ansible_host: 192.168.1.191
       ip: 192.168.1.191
       access_ip: 192.168.1.191
     node2:
       ansible_user: ubuntu
-      ansible_sudo_pass: ...
+      ansible_sudo_pass: <placeholder>
       ansible_host: 192.168.1.192
       ip: 192.168.1.192
       access_ip: 192.168.1.192
     node3:
       ansible_user: ubuntu
-      ansible_sudo_pass: ...
+      ansible_sudo_pass: <placeholder>
       ansible_host: 192.168.1.193
       ip: 192.168.1.193
       access_ip: 192.168.1.193

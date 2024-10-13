@@ -1,0 +1,181 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rook-ceph-cluster
+  namespace: argocd
+spec:
+  destination:
+    namespace: rook-ceph
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: https://charts.rook.io/release
+    targetRevision: v1.15.3
+    chart: rook-ceph-cluster
+    helm:
+      valuesObject:
+        toolbox:
+          enabled: true
+          resources:
+            limits:
+              memory: null
+            requests:
+              cpu: null
+              memory: null
+        cephClusterSpec:
+          mon:
+            count: 1
+          mgr:
+            count: 1
+            modules:
+          dashboard:
+            enabled: true
+          resources:
+            mgr:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            mon:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            osd:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            prepareosd:
+              requests:
+                cpu: null
+                memory: null
+            mgr-sidecar:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            crashcollector:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            logcollector:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            cleanup:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+            exporter:
+              limits:
+                memory: null
+              requests:
+                cpu: null
+                memory: null
+          storage:
+            useAllNodes: false
+            nodes:
+              - name: "node1"
+                devices:
+                  - name: "/dev/dm-1"
+              - name: "node2"
+                devices:
+                  - name: "/dev/dm-1"
+              - name: "node3"
+                devices:
+                  - name: "/dev/dm-1"
+        cephBlockPools:
+          - name: ceph-blockpool
+            spec:
+              failureDomain: host
+              replicated:
+                size: 2
+            storageClass:
+              enabled: true
+              name: ceph-block
+              isDefault: true
+              parameters:
+                imageFormat: "2"
+                imageFeatures: layering
+                csi.storage.k8s.io/provisioner-secret-name: rook-csi-rbd-provisioner
+                csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
+                csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
+                csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/fstype: ext4
+        cephFileSystems:
+          - name: ceph-filesystem
+            spec:
+              metadataPool:
+                replicated:
+                  size: 2
+              dataPools:
+                - failureDomain: host
+                  replicated:
+                    size: 2
+                  name: data0
+              metadataServer:
+                activeCount: 1
+                activeStandby: true
+                resources:
+                  limits:
+                    memory: null
+                  requests:
+                    cpu: null
+                    memory: null
+                priorityClassName: system-cluster-critical
+            storageClass:
+              enabled: true
+              name: ceph-filesystem
+              parameters:
+                csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+                csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+                csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+                csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+                csi.storage.k8s.io/fstype: ext4
+        cephObjectStores:
+          - name: ceph-objectstore
+            spec:
+              metadataPool:
+                failureDomain: host
+                replicated:
+                  size: 2
+              dataPool:
+                failureDomain: host
+                erasureCoded:
+                  dataChunks: 2
+                  codingChunks: 1
+              preservePoolsOnDelete: true
+              gateway:
+                port: 80
+                resources:
+                  limits:
+                    memory: null
+                  requests:
+                    cpu: null
+                    memory: null
+                instances: 1
+                priorityClassName: system-cluster-critical
+            storageClass:
+              enabled: true
+              name: ceph-bucket
+              parameters:
+                region: us-east-1
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true

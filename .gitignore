@@ -124,3 +124,7 @@ ansible_collections
 !inventory/mycluster
 inventory/mycluster/credentials
 kubespray-venv
+kubeseal-cert.pem
+argocd-init-apps/*.unsealed.yaml
+argocd-apps/*.unsealed.yaml
+localcert-acmedns.json
