@@ -5,6 +5,8 @@ metadata:
   labels:
     homeserver-gateway: enabled
     istio-injection: enabled
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
