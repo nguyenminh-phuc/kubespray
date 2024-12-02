@@ -23,6 +23,9 @@ cp -rfp inventory/sample inventory/mycluster
 declare -a IPS=(192.168.1.191 192.168.1.192 192.168.1.193)
 CONFIG_FILE=inventory/mycluster/hosts.yaml python3 contrib/inventory_builder/inventory.py ${IPS[@]}
 
+# if using longhorn, edit k8s_cluster/addons.yaml
+registry_storage_class: longhorn
+
 ansible-playbook -i inventory/mycluster/hosts.yaml  --become --become-user=root cluster.yml --extra-vars "ansible_sudo_pass=<password>"
 
 # kubeconfig
@@ -36,27 +39,29 @@ sudo chown -R $(whoami):$(whoami) ~/.kube/config
 kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 kubectl port-forward -n argocd svc/argocd-server 8080:443
 
-# logical volumes for ceph
+# persistent storage, choose one: ceph or longhorn
+## ceph
+### logical volumes for ceph
 sudo fdisk /dev/sda # create a partition, 'n' to create, 'w' to write
 sudo vgextend vg0 /dev/sda4
 sudo lvcreate -n ceph_vl -l 100%FREE vg0
 sudo dmsetup info /dev/dm-1 # this should match vg0-ceph_vl
-
-# ceph
-# https://rook.io/docs/rook/v1.15/Helm-Charts/operator-chart/
-kubectl create -f argocd-init-apps/rook-ceph-operator.yaml
+### https://rook.io/docs/rook/v1.15/Helm-Charts/operator-chart/
+argocd app create -f argocd-init-apps/rook-ceph-operator.yaml
 kubectl get pods -n rook-ceph -l "app=rook-ceph-operator"
-kubectl create -f argocd-init-apps/rook-ceph-cluster.yaml
+argocd app create -f argocd-init-apps/rook-ceph-cluster.yaml
 kubectl get cephcluster -n rook-ceph
 kubectl krew install rook-ceph
+## longhorn
+argocd app create -f argocd-init-apps/longhorn.yaml
 
 # gitea
 # https://docs.gitea.com/installation/install-on-kubernetes
-kubectl create -f argocd-init-apps/gitea.yaml
+argocd app create -f argocd-init-apps/gitea.yaml
 kubectl port-forward -n gitea svc/gitea-http 8081:3000 # kube-vip LoadBalancer isn't ready yet
 
 # kubeseal
-kubectl create -f argocd-init-apps/sealed-secrets.yaml
+argocd app create -f argocd-init-apps/sealed-secrets.yaml
 kubeseal --fetch-cert > kubeseal-cert.pem
 
 # add gitea credentials to argocd
@@ -68,6 +73,8 @@ kubectl create -f argocd-init-apps/gitea-credentials.sealed.yaml
 
 # app of apps
 kubectl create -f argocd-init-apps/app-of-apps.yaml
+## lightweight version
+kubectl create -f argocd-init-apps/app-of-apps-lw.yaml
 
 ##########
 

@@ -18,9 +18,9 @@ spec:
     namespace: homeserver
     server: https://kubernetes.default.svc
   source:
-    repoURL: http://gitea-http.gitea:3000/nguyenminh-phuc/k8s-homeserver
+    repoURL: https://github.com/nguyenminh-phuc/k8s-homeserver
     targetRevision: custom-v3
-    path: argocd-apps
+    path: argocd-apps-lw
   project: default
   syncPolicy:
     automated:

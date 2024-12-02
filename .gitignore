@@ -127,4 +127,5 @@ kubespray-venv
 kubeseal-cert.pem
 argocd-init-apps/*.unsealed.yaml
 argocd-apps/*.unsealed.yaml
+argocd-apps-lw/*.unsealed.yaml
 localcert-acmedns.json
